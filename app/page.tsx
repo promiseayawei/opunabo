@@ -7,13 +7,11 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { ShieldCheck, Users2, SlidersHorizontal } from "lucide-react";
 
-// ...your Home component code
-
 const carouselImages = [
-  { src: "/carousel1.jpg", caption: "Customer Support, 24/7" },
-  { src: "/carousel2.jpg", caption: "Empowering Operations" },
-  { src: "/carousel3.jpg", caption: "Streamline Communications" },
-  { src: "/carousel4.jpg", caption: "Build Smarter Processes" },
+  { src: "/carousel1.jpg", caption: "Personalized Wealth Management" },
+  { src: "/carousel2.jpg", caption: "Strategic Financial Planning" },
+  { src: "/carousel3.jpg", caption: "Tailored Investment Solutions" },
+  { src: "/carousel4.jpg", caption: "Long-Term Capital Growth" },
 ];
 
 export default function Home() {
@@ -25,29 +23,29 @@ export default function Home() {
   const touchEndX = useRef(0);
 
   useEffect(() => {
-  const animateCount = (setter: React.Dispatch<React.SetStateAction<number>>, end: number) => {
-    let count = 0;
-    const step = Math.ceil(end / 40);
-    const interval = setInterval(() => {
-      count += step;
-      if (count >= end) {
-        setter(end);
-        clearInterval(interval);
-      } else {
-        setter(count);
-      }
-    }, 50);
-  };
+    const animateCount = (setter: React.Dispatch<React.SetStateAction<number>>, end: number) => {
+      let count = 0;
+      const step = Math.ceil(end / 40);
+      const interval = setInterval(() => {
+        count += step;
+        if (count >= end) {
+          setter(end);
+          clearInterval(interval);
+        } else {
+          setter(count);
+        }
+      }, 50);
+    };
 
-  animateCount(setClients, 50);
-  animateCount(setConsultations, 105);
-  animateCount(setProjects, 75);
+    animateCount(setClients, 150);
+    animateCount(setConsultations, 300);
+    animateCount(setProjects, 120);
 
-  const timer = setInterval(() => {
-    setCurrentSlide((prev) => (prev + 1) % carouselImages.length);
-  }, 7000);
-  return () => clearInterval(timer);
-}, []);
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % carouselImages.length);
+    }, 7000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.changedTouches[0].clientX;
@@ -64,17 +62,9 @@ export default function Home() {
 
   return (
     <main className="bg-[#0d1117] text-white">
-      <motion.section
-  initial={{ opacity: 0, y: 40 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true }}
-  transition={{ duration: 0.6 }}
-  className="py-16 px-6 bg-[#0d1117] text-white"
->
-
-      {/* Hero Carousel */}
+      {/* Hero Section */}
       <section
-        className="relative text-center py-32 px-6 overflow-hidden"
+        className="relative text-center py-32 px-6 overflow-hidden bg-[#0A0F1A] text-[#F1F1F1]"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -100,101 +90,96 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Bricore Empowers Your Business</h1>
-          <p className="text-lg mb-6 max-w-2xl mx-auto text-gray-300">
-            Scalable, data-driven, and always on — we transform your operations from within.
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-[#F1F1F1]">
+            Chicago Capital Management Group
+          </h1>
+          <p className="text-lg mb-6 max-w-2xl mx-auto text-[#F1F1F1]/80">
+            Dedicated to delivering long-term financial security through trusted investment strategies and personal advisory.
           </p>
           <a
             href="/contact"
-            className="bg-[#1f6feb] text-white px-6 py-3 rounded-full font-medium hover:bg-[#388bfd] transition duration-300"
+            className="bg-[#D4AF37] text-[#0A0F1A] px-6 py-3 rounded-full font-medium hover:bg-[#E5C97B] transition duration-300"
           >
-            Get Started
+            Book a Consultation
           </a>
-          <div className="mt-4 text-sm text-gray-400 italic">
+          <div className="mt-4 text-sm text-[#F1F1F1]/70 italic">
             {carouselImages[currentSlide].caption}
           </div>
         </motion.div>
       </section>
-      </motion.section>
 
-      {/* Stats Section */}
-      <motion.section
-  initial={{ opacity: 0, y: 40 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true }}
-  transition={{ duration: 0.6 }}
-  className="py-16 px-6 bg-[#0d1117] text-white"
->
-      <section className="py-20 bg-[#161b22] text-center">
+      {/* Stats */}
+      <section className="py-20 bg-[#1C2230] text-center text-[#F1F1F1]">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-2xl font-bold mb-6">Trusted Numbers</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-5xl mx-auto text-white">
-            <div className="text-3xl font-bold"><h2>Clients</h2> {clients}+</div>
-            <div className="text-3xl font-bold"><h2>Consultations</h2> {consultations}+</div>
-            <div className="text-3xl font-bold"><h2>Projects</h2> {projects}+</div>
+          <h2 className="text-2xl font-bold mb-6 text-[#D4AF37]">Our Impact</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div className="text-3xl font-bold">
+              <h2 className="text-sm font-medium text-[#F1F1F1]/70 uppercase mb-1">Clients</h2>
+              {clients}+
+            </div>
+            <div className="text-3xl font-bold">
+              <h2 className="text-sm font-medium text-[#F1F1F1]/70 uppercase mb-1">Consultations</h2>
+              {consultations}+
+            </div>
+            <div className="text-3xl font-bold">
+              <h2 className="text-sm font-medium text-[#F1F1F1]/70 uppercase mb-1">Portfolios Managed</h2>
+              {projects}+
+            </div>
           </div>
         </motion.div>
       </section>
-</motion.section>
+
       {/* Value Proposition */}
-      <motion.section
-  initial={{ opacity: 0, y: 40 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true }}
-  transition={{ duration: 0.6 }}
-  className="py-16 px-6 bg-[#0d1117] text-white"
->
-      <section className="py-24 bg-[#0d1117] text-center">
+      <section className="py-24 bg-[#0A0F1A] text-center text-[#F1F1F1]">
         <motion.div
-          className="max-w-6xl mx-auto"
+          className="max-w-6xl mx-auto px-6"
           initial={{ opacity: 0, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
         >
-          <h2 className="text-3xl font-bold mb-6">Why Bricore Works</h2>
-          <p className="max-w-xl mx-auto text-gray-400 mb-12">
-            We provide a future-ready ecosystem of tools, consulting, and automation to help your business grow and scale sustainably.
+          <h2 className="text-3xl font-bold mb-6 text-[#D4AF37]">Why Clients Trust CCMG</h2>
+          <p className="max-w-xl mx-auto text-[#F1F1F1]/80 mb-12">
+            We bring clarity to complexity — empowering individuals and institutions to make smart financial decisions.
           </p>
           <div className="grid sm:grid-cols-3 gap-6">
             {[
-              { title: "Scalability", desc: "We grow with your business — no matter the size." },
-              { title: "Automation", desc: "Save time and reduce cost with our intelligent workflows." },
-              { title: "Support", desc: "24/7 expert help across all solutions you deploy." },
+              {
+                title: "Expertise",
+                desc: "Decades of experience in financial advisory and asset management.",
+              },
+              {
+                title: "Transparency",
+                desc: "We operate with full disclosure and integrity at all times.",
+              },
+              {
+                title: "Performance",
+                desc: "Driven by results, focused on long-term client goals.",
+              },
             ].map((item, i) => (
               <motion.div
                 key={i}
-                className="bg-[#161b22] p-6 rounded-lg hover:shadow-xl transition"
+                className="bg-[#1C2230] p-6 rounded-lg hover:shadow-xl transition"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.2 }}
               >
-                <h3 className="text-xl font-semibold mb-2 text-white">{item.title}</h3>
-                <p className="text-gray-400">{item.desc}</p>
+                <h3 className="text-xl font-semibold mb-2 text-[#F1F1F1]">{item.title}</h3>
+                <p className="text-[#F1F1F1]/70">{item.desc}</p>
               </motion.div>
             ))}
           </div>
         </motion.div>
       </section>
-</motion.section>
 
-      {/* Services Section */}
-
-      {/* Consultancy Section */}
-      <motion.section
-  initial={{ opacity: 0, y: 40 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true }}
-  transition={{ duration: 0.6 }}
-  className="py-16 px-6 bg-[#0d1117] text-white"
->
-      <section className="py-20 bg-[#161b22]">
+      {/* Services */}
+      <section className="py-20 bg-[#0A0F1A] text-[#F1F1F1]">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center px-6">
           <motion.div
             initial={{ opacity: 0, x: -60 }}
@@ -204,7 +189,7 @@ export default function Home() {
           >
             <Image
               src="/consulting.jpg"
-              alt="Consultancy Services"
+              alt="Financial Advisory"
               width={600}
               height={400}
               className="rounded-lg shadow-xl object-cover w-full"
@@ -217,241 +202,181 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
           >
-            <h2 className="text-3xl font-bold mb-4">Expert Guidance for Smart Growth</h2>
-            <p className="text-gray-400 mb-4">
-              Our consulting team walks with you through strategy, process redesign, and solution delivery — turning challenges into opportunities.
+            <h2 className="text-3xl font-bold mb-4 text-[#D4AF37]">Holistic Financial Advisory</h2>
+            <p className="text-[#F1F1F1]/80 mb-4">
+              We guide clients with tailored wealth strategies, risk management, and investment planning.
             </p>
-            <ul className="list-disc list-inside text-gray-300">
-              <li>Process Automation</li>
-              <li>Customer Experience Design</li>
-              <li>Performance Metrics</li>
-              <li>IT Advisory</li>
+            <ul className="list-disc list-inside text-[#F1F1F1]/70 space-y-1">
+              <li>Investment Portfolio Design</li>
+              <li>Retirement & Estate Planning</li>
+              <li>Risk Assessment</li>
+              <li>Corporate Advisory</li>
             </ul>
           </motion.div>
         </div>
       </section>
-</motion.section>
 
-      {/* Live Chat Section */}
-      <motion.section
-  initial={{ opacity: 0, y: 40 }}
-  whileInView={{ opacity: 1, y: 0 }}      
-  viewport={{ once: true }}
-  transition={{ duration: 0.6 }}
-  className="py-16 px-6 bg-[#0d1117] text-white"
->
-      {/* Features Summary */}
-      <section className="py-20 bg-[#0d1117] text-center">
+      {/* Differentiators */}
+      <section className="py-20 bg-[#0A0F1A] text-center">
         <motion.div
-          className="max-w-6xl mx-auto"
+          className="max-w-6xl mx-auto px-6"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-3xl font-bold mb-6">What Sets Us Apart</h2>
+          <h2 className="text-3xl font-bold mb-10 text-[#D4AF37]">What Makes Us Different</h2>
           <div className="grid sm:grid-cols-3 gap-8">
-            <div className="p-6 rounded-lg bg-[#161b22] shadow hover:shadow-xl transition">
-              <ShieldCheck className="mx-auto mb-4 text-[#58a6ff]" size={32} />
-              <h3 className="font-semibold text-xl mb-2">Reliability</h3>
-              <p className="text-gray-400">Dependable tech with guaranteed uptime & security.</p>
+            <div className="p-6 rounded-xl bg-[#1C2230] shadow hover:shadow-lg transition">
+              <ShieldCheck className="mx-auto mb-4 text-[#D4AF37]" size={32} />
+              <h3 className="font-semibold text-xl mb-2 text-[#F1F1F1]">Fiduciary Duty</h3>
+              <p className="text-[#F1F1F1]/70">Your interests always come first in every decision we make.</p>
             </div>
-            <div className="p-6 rounded-lg bg-[#161b22] shadow hover:shadow-xl transition">
-              <Users2 className="mx-auto mb-4 text-[#58a6ff]" size={32} />
-              <h3 className="font-semibold text-xl mb-2">Top Talent</h3>
-              <p className="text-gray-400">Work with experienced professionals, not bots.</p>
+            <div className="p-6 rounded-xl bg-[#1C2230] shadow hover:shadow-lg transition">
+              <Users2 className="mx-auto mb-4 text-[#D4AF37]" size={32} />
+              <h3 className="font-semibold text-xl mb-2 text-[#F1F1F1]">Client-Centric</h3>
+              <p className="text-[#F1F1F1]/70">We listen, adapt, and personalize every plan to your needs.</p>
             </div>
-            <div className="p-6 rounded-lg bg-[#161b22] shadow hover:shadow-xl transition">
-              <SlidersHorizontal className="mx-auto mb-4 text-[#58a6ff]" size={32} />
-              <h3 className="font-semibold text-xl mb-2">Customization</h3>
-              <p className="text-gray-400">Solutions tailored exactly to your business needs.</p>
+            <div className="p-6 rounded-xl bg-[#1C2230] shadow hover:shadow-lg transition">
+              <SlidersHorizontal className="mx-auto mb-4 text-[#D4AF37]" size={32} />
+              <h3 className="font-semibold text-xl mb-2 text-[#F1F1F1]">Flexible Options</h3>
+              <p className="text-[#F1F1F1]/70">Solutions that evolve with your financial journey.</p>
             </div>
           </div>
         </motion.div>
       </section>
-</motion.section>
 
-      {/* Live Chat Section */}
-
-      {/* Testimonials */}
-      <motion.section
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-      >
-      <section className="py-20 bg-[#161b22] text-center">
-        <h2 className="text-3xl font-bold mb-6">Client Testimonials</h2>
-        <div className="grid sm:grid-cols-3 gap-6 max-w-6xl mx-auto px-6">
-          {[
-            {
-              src: "/image1.png",
-              name: "Marie Davis",
-              quote: "Jennifer was a wonderful partner for our lead generation project. She was very responsive, open, and enthusiastic. Her work was fantastic, and we so appreciate her help. I'd recommend her to anyone looking for a great lead gen resource!",
-            },
-            {
-              src: "/image2.jpg",
-              name: "Emmanuel Adebayo",
-              quote: "Their analytics helped us understand customer behavior better. Highly recommended.",
-            },
-            {
-              src: "/queen-et ayawei.jpeg",
-              name: "Queen-et Ayawei",
-              quote: "The automation features are top-notch. We’ve saved countless hours.",
-            },
-          ].map(({ src, name, quote }, i) => (
-            <motion.div
-              key={i}
-              className="bg-[#0d1117] p-6 rounded-lg shadow hover:shadow-2xl transform hover:-translate-y-1 transition"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.3 }}
-            >
-              <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-4 border-[#58a6ff] shadow-md relative">
-                <Image src={src} alt={name} fill className="object-cover" />
-              </div>
-              <p className="italic text-sm text-gray-300">{`“${quote}”`}</p>
-              <p className="mt-4 font-bold text-white">{`— ${name}`}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-      </motion.section>
-
-      {/* Team Section */}
-      <motion.section
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-      >
-      <section className="py-20 bg-[#0d1117] text-center">
-        <motion.div
-          className="max-w-6xl mx-auto"
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <h2 className="text-3xl font-bold mb-6">Meet Our Team</h2>
-          <p className="text-gray-400 mb-12 max-w-2xl mx-auto">
-            Our strength lies in the diverse talents of our passionate professionals. Get to know the minds behind Bricore’s success.
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 px-6">
+      {/* testimonial */}
+      <section className="bg-[#0A0F1A] text-[#F1F1F1] py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-8 text-[#D4AF37]">What Our Clients Say</h2>
+          <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                name: "Jennifer Ogbole",
-                title: "Founder & CEO",
-                img: "/team1.jpg",
-                desc: "Leading Bricore with vision, strategy, and a passion for transformative solutions.",
+                name: "Sophia Ade",
+                image: "/testimonial1.jpg",
+                comment:
+                  "Chicago Capital helped transform our portfolio with unmatched insight and integrity.",
               },
               {
-                name: "Chinedu Ijoma",
-                title: "Head of Operations",
-                img: "/team2.jpg",
-                desc: "Ensures smooth delivery and coordination of all client and internal processes.",
+                name: "James Okonkwo",
+                image: "/testimonial2.jpg",
+                comment:
+                  "Professional, reliable, and deeply committed to delivering results.",
               },
               {
-                name: "Ayawei Promise Pretei",
-                title: "ICT Consultant",
-                img: "/promise_ayawei.jpeg",
-                desc: "Specializes in integrating technology solutions to enhance business operations.",
+                name: "Linda George",
+                image: "/testimonial3.jpg",
+                comment:
+                  "We felt supported and informed throughout our investment journey.",
               },
-              
-            ].map(({ name, title, img, desc }, i) => (
+            ].map(({ name, image, comment }, i) => (
               <motion.div
                 key={i}
-                className="bg-[#161b22] rounded-lg p-6 hover:shadow-xl transition"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.2 }}
+                whileHover={{ scale: 1.03 }}
+                className="bg-[#1C2230] p-6 rounded-2xl shadow-lg transition"
               >
-                <div className="w-24 h-24 mx-auto rounded-full overflow-hidden border-4 border-[#58a6ff] mb-4 relative">
-                  <Image src={img} alt={name} fill className="object-cover" />
-                </div>
-                <h3 className="text-xl font-semibold text-white">{name}</h3>
-                <p className="text-sm text-[#58a6ff] mb-2">{title}</p>
-                <p className="text-gray-400 text-sm">{desc}</p>
+                <Image
+                  src={image}
+                  alt={name}
+                  width={80}
+                  height={80}
+                  className="mx-auto rounded-full mb-4"
+                />
+                <p className="italic">"{comment}"</p>
+                <h4 className="mt-4 font-semibold text-[#D4AF37]">{name}</h4>
               </motion.div>
             ))}
           </div>
-        </motion.div>
+        </div>
       </section>
-      </motion.section>
 
-      {/* Email Subscription */}
-      <motion.section
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-      >
-      <section className="py-16 px-6 bg-[#0d1117] text-center">
-        <motion.div
-          className="max-w-xl mx-auto"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <h2 className="text-3xl font-bold text-white mb-4">Stay Updated</h2>
-          <p className="text-gray-400 mb-6">Subscribe to our newsletter for the latest insights, updates, and offers from Bricore.</p>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              alert("Thank you for subscribing! 🎉");
-            }}
-            className="flex flex-col sm:flex-row items-center gap-4 justify-center"
-          >
+      {/* team */}
+
+      <section className="bg-[#0A0F1A] text-[#F1F1F1] py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-8 text-[#D4AF37]">Meet Our Leadership</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Ifeanyi Umeh",
+                position: "Managing Partner",
+                image: "/team1.jpg",
+              },
+              {
+                name: "Chinelo Okoro",
+                position: "Investment Strategist",
+                image: "/team2.jpg",
+              },
+              {
+                name: "Tunde Bakare",
+                position: "Client Relations Director",
+                image: "/team3.jpg",
+              },
+            ].map(({ name, position, image }, i) => (
+              <motion.div
+                key={i}
+                whileHover={{ scale: 1.03 }}
+                className="bg-[#1C2230] p-6 rounded-2xl shadow-lg transition"
+              >
+                <Image
+                  src={image}
+                  alt={name}
+                  width={100}
+                  height={100}
+                  className="mx-auto rounded-full mb-4"
+                />
+                <h4 className="font-bold text-lg text-[#D4AF37]">{name}</h4>
+                <p className="text-sm text-gray-400">{position}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+
+
+
+      {/*news letter*/}
+      <section className="bg-[#0A0F1A] text-[#F1F1F1] py-16">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-4 text-[#D4AF37]">Stay Updated</h2>
+          <p className="mb-6 text-[#F1F1F1]">
+            Subscribe to receive the latest investment insights and updates from Chicago Capital.
+          </p>
+          <form className="flex flex-col md:flex-row justify-center gap-4 max-w-lg mx-auto">
             <input
               type="email"
-              required
               placeholder="Enter your email"
-              className="px-4 py-3 rounded-md w-full sm:w-2/3 text-white bg-[#161b22] border border-[#58a6ff] focus:outline-none focus:ring-2 focus:ring-[#58a6ff] transition"
-              style={{ boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)" }}
+              className="px-4 py-2 rounded-full border border-[#D4AF37] bg-transparent text-white placeholder:text-[#F1F1F1] focus:outline-none"
             />
             <button
               type="submit"
-              className="px-6 py-3 bg-[#58a6ff] hover:bg-[#4091e2] transition text-white rounded-md font-semibold"
+              className="bg-[#D4AF37] hover:bg-[#E5C97B] text-[#0A0F1A] font-semibold px-6 py-2 rounded-full transition"
             >
               Subscribe
             </button>
           </form>
-        </motion.div>
+        </div>
       </section>
-      </motion.section>
 
-      {/* Footer */}
-{/* WhatsApp Floating Button */}
-<a
-  href="https://wa.me/234905348075?text=Hello%20Bricore%2C%20I%27d%20like%20to%20know%20more%20about%20your%20services"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="fixed bottom-6 right-6 z-50"
->
-  <div className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-6 w-6"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M16.72 12.28c-.54-.27-1.2-.12-1.63.3l-.3.3a1.92 1.92 0 01-2.71 0l-.35-.35a1.92 1.92 0 010-2.71l.3-.3c.42-.43.57-1.09.3-1.63a6.12 6.12 0 00-10.59 2.4A9 9 0 0012 21a9 9 0 009-9c0-1.5-.4-2.91-1.15-4.16z"
-      />
-    </svg>
-  </div>
-</a>
 
-      
 
+      {/* ...keep Testimonials, Team, and Newsletter sections... update images and names if necessary... */}
+
+      {/* WhatsApp Floating Button */}
+      <a
+        href="https://wa.me/234905348075?text=Hello%20CCMG%2C%20I%27m%20interested%20in%20your%20financial%20services"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-6 z-50"
+      >
+        <div className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16.72 12.28..." />
+          </svg>
+        </div>
+      </a>
     </main>
   );
 }
