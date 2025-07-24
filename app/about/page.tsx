@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { Rocket, Briefcase, Users, Star } from "lucide-react";
 
 const milestones = [

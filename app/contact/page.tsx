@@ -14,8 +14,9 @@ export default function ContactPage() {
       >
         <h1 className="text-4xl font-bold text-[#D4AF37] mb-4">Contact Us</h1>
         <p className="text-[#F1F1F1] mb-12">
-          Whether you're a partner, investor, or community member — we're ready to connect.
+          Whether you&#39;re a partner, investor, or community member — we&#39;re ready to connect.
         </p>
+
       </motion.div>
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">

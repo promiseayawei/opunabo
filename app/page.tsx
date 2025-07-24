@@ -254,19 +254,19 @@ export default function Home() {
             {[
               {
                 name: "Sophia Ade",
-                image: "/testimonial1.jpg",
+                image: "/image1.jpg",
                 comment:
                   "Chicago Capital helped transform our portfolio with unmatched insight and integrity.",
               },
               {
                 name: "James Okonkwo",
-                image: "/testimonial2.jpg",
+                image: "/image2.jpg",
                 comment:
                   "Professional, reliable, and deeply committed to delivering results.",
               },
               {
-                name: "Linda George",
-                image: "/testimonial3.jpg",
+                name: "Levy George",
+                image: "/image3.jpg",
                 comment:
                   "We felt supported and informed throughout our investment journey.",
               },
@@ -283,7 +283,7 @@ export default function Home() {
                   height={80}
                   className="mx-auto rounded-full mb-4"
                 />
-                <p className="italic">"{comment}"</p>
+             <p className="italic">&quot;{comment}&quot;</p>
                 <h4 className="mt-4 font-semibold text-[#D4AF37]">{name}</h4>
               </motion.div>
             ))}
@@ -299,19 +299,19 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                name: "Ifeanyi Umeh",
+                name: "Brian Smith",
                 position: "Managing Partner",
                 image: "/team1.jpg",
               },
               {
-                name: "Chinelo Okoro",
+                name: "Hariet Conde",
                 position: "Investment Strategist",
-                image: "/team2.jpg",
+                image: "/team4.jpg",
               },
               {
-                name: "Tunde Bakare",
-                position: "Client Relations Director",
-                image: "/team3.jpg",
+                name: "Professor Prosper Ayawei",
+                position: "African Director",
+                image: "/team3.png",
               },
             ].map(({ name, position, image }, i) => (
               <motion.div
