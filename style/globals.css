@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+html,
+body {
+  font-family: 'Inter', sans-serif;
+  scroll-behavior: smooth;
+  background-color: #02040b;
+  color: #4282ea;
+}
+
+:root {
+  --primary-color: #4282ea;
+}
+
+/* Custom utility classes and animations */
+@layer utilities {
+  .text-primary {
+    color: var(--primary-color);
+  }
+
+  .bg-primary {
+    background-color: var(--primary-color);
+  }
+
+  .hover\:bg-primary:hover {
+    background-color: var(--primary-color);
+  }
+
+  .border-primary {
+    border-color: var(--primary-color);
+  }
+
+  .hover\:shadow-primary\/50:hover {
+    box-shadow: 0 0 10px rgba(66, 130, 234, 0.5);
+  }
+
+  .ring-primary:focus {
+    ring-color: var(--primary-color);
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes spin-slow {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 5s linear infinite;
+  }
+}
