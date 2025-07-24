@@ -1,110 +1,116 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ClipboardList, Workflow, Headset, LineChart, Users } from "lucide-react";
-
-const services = [
-  {
-    icon: ClipboardList,
-    title: "Admin & Executive Assistance",
-    description:
-      "Delegate your email, scheduling, document prep, and daily ops to a professional assistant who gets it done fast and right.",
-  },
-  {
-    icon: Workflow,
-    title: "Process Automation",
-    description:
-      "We identify bottlenecks and automate your workflows using smart tools so you can scale without burnout.",
-  },
-  {
-    icon: Headset,
-    title: "Customer Support",
-    description:
-      "From DMs to email and help desk tickets, we handle your customer conversations with speed and professionalism.",
-  },
-  {
-    icon: LineChart,
-    title: "Data & Reporting",
-    description:
-      "Get custom dashboards, reports, and tracking tools that help you make decisions based on real insights — not guesswork.",
-  },
-  {
-    icon: Users,
-    title: "Team Coordination",
-    description:
-      "We help manage your virtual team, track tasks, and ensure everyone stays aligned with your business goals.",
-  },
-];
+import Image from "next/image";
+import { ShieldCheck, Users2, SlidersHorizontal } from "lucide-react";
 
 export default function ServicesPage() {
   return (
-    <main className="bg-[#0b1120] text-white min-h-screen py-20 px-6">
-      <div className="max-w-6xl mx-auto space-y-16">
-        {/* Header */}
+    <main className="bg-[#0A0F1A] text-[#F1F1F1]">
+      {/* Hero */}
+      <section className="py-20 text-center px-6">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
-          <h1 className="text-4xl md:text-5xl font-bold text-[#4282ea] mb-4">Our Services</h1>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-            We help founders and business owners stay organized, automate tasks, and deliver great customer experiences.
-          </p>
-        </motion.div>
-
-        {/* Services Grid */}
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          transition={{ staggerChildren: 0.2 }}
-          viewport={{ once: true }}
-          className="grid md:grid-cols-2 gap-8"
-        >
-          {services.map(({ icon: Icon, title, description }, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="bg-[#1c2333] p-6 rounded-lg shadow hover:shadow-lg transition"
-            >
-              <Icon size={40} className="text-[#4282ea] mb-4" />
-              <h3 className="text-xl font-semibold text-[#4282ea] mb-2">{title}</h3>
-              <p className="text-gray-400">{description}</p>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: -40 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="text-center space-y-4 mt-10"
+          className="max-w-4xl mx-auto"
         >
-          <h2 className="text-2xl font-bold text-[#4282ea]">Let’s Work Together</h2>
-          <p className="text-gray-300 max-w-xl mx-auto">
-            Whether you’re just starting out or scaling fast, we’ll match you with support that grows with your business.
+          <h1 className="text-[#D4AF37] text-4xl font-bold mb-4">Our Services</h1>
+          <p className="text-[#ccc] text-lg">
+            Tailored investment strategies, trusted advisory, and world-class financial services built for long-term growth.
           </p>
-          <div className="flex justify-center gap-4 mt-4">
-            <a
-              href="/book-session"
-              className="px-6 py-3 bg-[#4282ea] text-black font-semibold rounded-md hover:opacity-90 transition"
-            >
-              Book a Session
-            </a>
-            <a
-              href="/contact"
-              className="px-6 py-3 border border-[#4282ea] text-[#4282ea] rounded-md font-semibold hover:bg-[#4282ea]/10 transition"
-            >
-              Contact Us
-            </a>
+        </motion.div>
+      </section>
+
+      {/* Financial Advisory */}
+      <section className="py-20 bg-[#0A0F1A]">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center px-6">
+          <motion.div
+            initial={{ opacity: 0, x: -60 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+          >
+            <Image
+              src="/consulting.jpg"
+              alt="Financial Advisory"
+              width={600}
+              height={400}
+              className="rounded-lg shadow-xl object-cover w-full"
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 60 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+          >
+            <h2 className="text-3xl font-bold mb-4 text-[#D4AF37]">Holistic Financial Advisory</h2>
+            <p className="text-[#ccc] mb-4">
+              Our team works with high-net-worth individuals and institutions to build tailored investment and wealth preservation strategies.
+            </p>
+            <ul className="list-disc list-inside text-[#F1F1F1]">
+              <li>Portfolio Management & Asset Allocation</li>
+              <li>Trust & Estate Planning Strategies</li>
+              <li>Alternative Investment Access</li>
+              <li>Family Office & Private Client Services</li>
+            </ul>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Differentiators */}
+      <section className="py-20 bg-[#1C2230] text-center">
+        <motion.div
+          className="max-w-6xl mx-auto"
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <h2 className="text-3xl font-bold mb-6 text-[#D4AF37]">What Sets Us Apart</h2>
+          <div className="grid sm:grid-cols-3 gap-8 px-6">
+            <div className="p-6 rounded-lg bg-[#0A0F1A] shadow hover:shadow-xl transition">
+              <ShieldCheck className="mx-auto mb-4 text-[#D4AF37]" size={32} />
+              <h3 className="font-semibold text-xl mb-2">Independent & Objective</h3>
+              <p className="text-[#ccc]">We act with full transparency and no conflict of interest—your goals lead every decision.</p>
+            </div>
+            <div className="p-6 rounded-lg bg-[#0A0F1A] shadow hover:shadow-xl transition">
+              <Users2 className="mx-auto mb-4 text-[#D4AF37]" size={32} />
+              <h3 className="font-semibold text-xl mb-2">Client-Focused</h3>
+              <p className="text-[#ccc]">We build relationships that span generations, with your legacy at the forefront.</p>
+            </div>
+            <div className="p-6 rounded-lg bg-[#0A0F1A] shadow hover:shadow-xl transition">
+              <SlidersHorizontal className="mx-auto mb-4 text-[#D4AF37]" size={32} />
+              <h3 className="font-semibold text-xl mb-2">Adaptive Strategies</h3>
+              <p className="text-[#ccc]">Our solutions evolve with your needs—dynamic, data-driven, and resilient.</p>
+            </div>
           </div>
         </motion.div>
-      </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 text-center bg-[#0A0F1A] px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="max-w-3xl mx-auto"
+        >
+          <h2 className="text-3xl font-bold mb-4 text-[#D4AF37]">Let’s Build a Smarter Future Together</h2>
+          <p className="text-[#ccc] mb-6">
+            Discover how Chicago Capital Management Group can transform your financial strategy with integrity and foresight.
+          </p>
+          <a
+            href="/contact"
+            className="inline-block bg-[#D4AF37] text-black px-6 py-3 rounded-lg font-semibold hover:bg-[#b8962f] transition"
+          >
+            Get in Touch
+          </a>
+        </motion.div>
+      </section>
     </main>
   );
 }
