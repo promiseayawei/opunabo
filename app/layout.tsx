@@ -17,7 +17,7 @@ import { Toaster } from "react-hot-toast";
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-[#0a0f1a] text-white flex flex-col min-h-screen font-sans">
+      <body className="bg-[#0A0F1A] text-[#F1F1F1] flex flex-col min-h-screen font-sans">
         <Header />
         <Toaster position="top-right" />
         <main className="flex-grow">{children}</main>
@@ -33,44 +33,39 @@ function Header() {
   const pathname = usePathname();
 
   useEffect(() => {
-    setOpen(false); // Close menu when route changes
+    setOpen(false); // Close mobile menu on route change
   }, [pathname]);
 
   const links = [
     { label: "Home", href: "/" },
     { label: "About", href: "/about" },
     { label: "Services", href: "/services" },
-    { label: "Pricing", href: "/pricing" },
-    { label: "Book", href: "/book" },
+    { label: "Team", href: "/team" },
+    { label: "Partners", href: "/partners" },
+    { label: "Projects", href: "/projects" },
     { label: "Contact", href: "/contact" },
   ];
 
   const navLinkClasses = (href: string) =>
-    `hover:text-[#4282ea] transition ${
-      pathname === href ? "text-[#4282ea] font-semibold" : "text-gray-300"
+    `transition hover:text-[#E5C97B] ${pathname === href ? "text-[#D4AF37] font-semibold" : "text-[#F1F1F1B3]"
     }`;
 
   return (
-    <header className="bg-[#0a0f1a] text-white p-4 sticky top-0 z-50 border-b border-[#1a1f2c]">
+    <header className="bg-[#0A0F1A] p-4 sticky top-0 z-50 border-b border-[#1A1F2C]">
       <div className="container mx-auto flex justify-between items-center">
         <Link href="/" className="flex items-center space-x-2">
-          <h1 className="text-3xl font-bold text-[#4282ea]">bricore</h1>
-          <p className="text-sm font-light text-gray-400">solutions</p>
+          <h1 className="text-3xl font-bold text-[#D4AF37]">CCMG</h1>
+          <p className="text-sm font-light text-[#F1F1F1B3]">LLC</p>
         </Link>
 
         <nav className="hidden md:flex space-x-6">
           {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={navLinkClasses(link.href)}
-            >
+            <Link key={link.href} href={link.href} className={navLinkClasses(link.href)}>
               {link.label}
             </Link>
           ))}
         </nav>
 
-        {/* Mobile Toggle */}
         <button
           className="md:hidden text-white"
           onClick={() => setOpen((o) => !o)}
@@ -79,14 +74,13 @@ function Header() {
           {open ? <X /> : <MenuIcon />}
         </button>
 
-        {/* Mobile Dropdown */}
         {open && (
-          <div className="absolute top-16 right-4 bg-[#111827] w-48 rounded shadow-lg z-50">
+          <div className="absolute top-16 right-4 bg-[#1C2230] w-48 rounded shadow-lg z-50">
             {links.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`block px-4 py-3 text-sm text-gray-300 hover:text-[#4282ea] hover:bg-[#1f2937] transition`}
+                className="block px-4 py-3 text-sm text-[#F1F1F1B3] hover:text-[#E5C97B] hover:bg-[#2A2F3C] transition"
               >
                 {link.label}
               </Link>
@@ -100,63 +94,59 @@ function Header() {
 
 function Footer() {
   return (
-    <footer className="bg-[#0c111c] text-white py-14 px-6 text-sm mt-10 border-t border-[#1a1f2c]">
+   <footer className="bg-[#1C2230] py-14 px-6 text-sm mt-10 border-t border-[#1A1F2C]">
       <div className="max-w-6xl mx-auto grid md:grid-cols-4 gap-8">
         {/* About */}
         <div>
-          <h4 className="text-[#4282ea] font-semibold mb-4">About Bricore</h4>
-          <p className="text-gray-400 leading-relaxed">
-            We help small businesses scale through smart admin support,
-            automation, and human-centered digital services.
+          <h4 className="text-[#D4AF37] font-semibold mb-4">About CCMG</h4>
+          <p className="text-[#F1F1F1B3] leading-relaxed">
+            Chicago Capital Management Group LLC specializes in equity investment, capital structuring, and strategic partnerships for sustainable community growth.
           </p>
         </div>
 
         {/* Navigation */}
         <div>
-          <h4 className="text-[#4282ea] font-semibold mb-4">Explore</h4>
-          <ul className="space-y-2 text-gray-400">
-            {["Home", "About", "Services", "Pricing", "Book", "Contact"].map(
-              (p) => (
-                <li key={p}>
-                  <Link
-                    href={`/${p.toLowerCase()}`}
-                    className="hover:text-[#4282ea] transition"
-                  >
-                    {p}
-                  </Link>
-                </li>
-              )
-            )}
+          <h4 className="text-[#D4AF37] font-semibold mb-4">Explore</h4>
+          <ul className="space-y-2 text-[#F1F1F1B3]">
+            {["Home", "About", "Services", "Team", "Partners", "Projects", "Contact"].map((p) => (
+              <li key={p}>
+                <Link
+                  href={`/${p.toLowerCase()}`}
+                  className="hover:text-[#E5C97B] transition"
+                >
+                  {p}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
 
         {/* Contact Info */}
         <div>
-          <h4 className="text-[#4282ea] font-semibold mb-4">Contact</h4>
-          <ul className="text-gray-400 space-y-2">
-            <li>Email: hello@bricore.com</li>
-            <li>Phone: +234 9055 348 075</li>
-            <li>Location: Abuja, Nigeria</li>
+          <h4 className="text-[#D4AF37] font-semibold mb-4">Contact</h4>
+          <ul className="text-[#F1F1F1B3] space-y-2">
+            <li>Chicago Capital Management Group LLC</li>
+            <li>2400 Cabot Drive</li>
+            <li>Suite 400</li>
+            <li>Lisle, IL. 60532</li>
+            <li>Tel. (630) 344-9734</li>
           </ul>
         </div>
 
         {/* Social Links */}
         <div>
-          <h4 className="text-[#4282ea] font-semibold mb-4">Follow Us</h4>
-          <div className="flex gap-4 text-gray-400">
-            <Link href="#"><Facebook className="hover:text-[#4282ea]" /></Link>
-            <Link href="#"><Twitter className="hover:text-[#4282ea]" /></Link>
-            <Link href="https://www.linkedin.com/company/bricore-solutions"><Linkedin className="hover:text-[#4282ea]" /></Link>
-            <Link href="https://www.instagram.com/bricore.solutions?igsh=bHoxbWd2aGVkcnFi&utm_source=qr"><Instagram className="hover:text-[#4282ea]" /></Link>
+          <h4 className="text-[#D4AF37] font-semibold mb-4">Follow Us</h4>
+          <div className="flex gap-4 text-[#F1F1F1B3]">
+            <Link href="#"><Facebook className="hover:text-[#E5C97B]" /></Link>
+            <Link href="#"><Twitter className="hover:text-[#E5C97B]" /></Link>
+            <Link href="#"><Linkedin className="hover:text-[#E5C97B]" /></Link>
+            <Link href="#"><Instagram className="hover:text-[#E5C97B]" /></Link>
           </div>
         </div>
       </div>
 
-      <div className="text-center mt-10 text-gray-500">
-        &copy; {new Date().getFullYear()} Bricore. All rights reserved. developed by{" "}
-        <Link href="#" className="hover:text-[#4282ea]">
-          Ayaweisoft limited
-        </Link>
+      <div className="text-center mt-10 text-[#F1F1F1B3]">
+        &copy; {new Date().getFullYear()} chicagocapitalmanagementgroup.com
       </div>
     </footer>
   );
