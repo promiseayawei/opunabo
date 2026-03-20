@@ -14,7 +14,7 @@ const links = [
   { label: "Team",          href: "/team" },
   { label: "Testimonials",  href: "/testimonials" },
   { label: "Practice Areas",href: "/practice-areas" },
-  { label: "Projects",      href: "/projects" },
+  { label: "News",      href: "/blog" },
   { label: "Contact",       href: "/contact" },
 ];
 
