@@ -64,7 +64,7 @@ export default function Footer() {
           </div>
 
           <p className="text-[13px] leading-relaxed mb-5" style={{ color: "rgba(241,241,241,0.4)" }}>
-            Rivers State's trusted counsel for complex litigation, corporate mandates,
+            Rivers State&apos;s trusted counsel for complex litigation, corporate mandates,
             and property law. Called to the Nigerian Bar since 1999.
           </p>
 

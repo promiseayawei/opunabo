@@ -138,7 +138,7 @@ function FeaturedCarousel() {
               <motion.p key={idx} className="text-gray-300 font-sans text-base leading-relaxed italic mb-8"
                 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.5 }}>
-                "{t.text}"
+                &quot;{t.text}&quot;
               </motion.p>
             </AnimatePresence>
 
@@ -295,7 +295,7 @@ export default function TestimonialsPage() {
                 <Quote size={22} className="text-[#FFD700]/12 mb-3 flex-shrink-0" />
 
                 <p className="text-gray-400 italic text-sm font-sans leading-relaxed flex-1 mb-7">
-                  "{t.text}"
+                  &quot;{t.text}&quot;
                 </p>
 
                 <div className="border-t border-white/5 pt-5">

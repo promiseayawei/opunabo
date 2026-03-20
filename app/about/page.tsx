@@ -219,7 +219,7 @@ export default function AboutPage() {
               Who We <span className="text-[#FFD700] drop-shadow-[0_0_12px_rgba(255,215,0,0.4)]">Are</span>
             </h2>
             <p className="text-gray-400 font-sans text-sm leading-relaxed mb-5">
-              Opunabo Ekine & Associates is a full-service law firm headquartered in Port Harcourt, Nigeria. Since our founding in 1999, we have grown into one of Rivers State's most respected legal institutions — known for courtroom tenacity, commercial sophistication, and genuine commitment to every client we represent.
+              Opunabo Ekine &amp; Associates is a full-service law firm headquartered in Port Harcourt, Nigeria. Since our founding in 1999, we have grown into one of Rivers State&apos;s most respected legal institutions — known for courtroom tenacity, commercial sophistication, and genuine commitment to every client we represent.
             </p>
             <p className="text-gray-400 font-sans text-sm leading-relaxed mb-8">
               We serve individuals, corporations, government bodies, and non-profit organisations across six core practice areas. From complex multi-jurisdictional litigation and energy sector advisory to family matters and property transactions, we bring the same rigour and dedication to every mandate.
@@ -400,8 +400,8 @@ export default function AboutPage() {
         <motion.div className="max-w-3xl mx-auto text-center relative z-10"
           initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
           <p className="text-2xl md:text-3xl font-bold text-white leading-relaxed italic mb-8">
-            "We do not merely practise law. We champion the rights of those who trust us
-            with their most important challenges — and we do not stop until the work is done."
+            &quot;We do not merely practise law. We champion the rights of those who trust us
+            with their most important challenges — and we do not stop until the work is done.&quot;
           </p>
           <div className="flex items-center justify-center gap-3">
             <div className="w-8 h-px bg-[#FFD700]/50" />
@@ -424,7 +424,7 @@ export default function AboutPage() {
           <p className="text-[#FFD700]/60 text-xs font-sans tracking-[0.35em] uppercase mb-6">Begin Your Case</p>
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">
             Ready to Work With{" "}
-            <span className="text-[#FFD700] drop-shadow-[0_0_20px_rgba(255,215,0,0.4)]">Nigeria's Best?</span>
+            <span className="text-[#FFD700] drop-shadow-[0_0_20px_rgba(255,215,0,0.4)]">Nigeria&apos;s Best?</span>
           </h2>
           <p className="text-gray-400 mb-10 font-sans text-sm leading-relaxed">
             Schedule a confidential consultation with one of our senior attorneys and take
