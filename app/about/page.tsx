@@ -126,9 +126,9 @@ export default function AboutPage() {
       <section className="relative py-36 text-center overflow-hidden min-h-[72vh] flex flex-col justify-center">
         <div className="absolute inset-0 z-0">
           <Image src="/law-library.jpeg" alt="About the Firm" fill sizes="100vw"
-            className="object-cover opacity-30" priority />
+            className="object-cover opacity-60 brightness-110" priority />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#080C14]/70 via-[#080C14]/45 to-[#080C14] z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#080C14]/40 via-[#080C14]/20 to-[#080C14]/30 z-10" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_55%,rgba(255,215,0,0.07),transparent)] z-10 pointer-events-none" />
         <Particles />
 

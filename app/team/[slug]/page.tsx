@@ -35,10 +35,9 @@ export default function AttorneyProfilePage({ params }: Props) {
         <div className="absolute inset-0 z-0">
           <Image
             src={attorney.image} alt={attorney.name} fill sizes="100vw"
-            className="object-cover object-top opacity-20" priority
-          />
+            className="object-cover object-top opacity-60 brightness-110" priority />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#080C14]/80 via-[#080C14]/60 to-[#080C14] z-10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#080C14]/40 via-[#080C14]/20 to-[#080C14]/30 z-10" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_70%_at_30%_50%,rgba(255,215,0,0.06),transparent)] z-10 pointer-events-none" />
         <Particles count={12} />
 
