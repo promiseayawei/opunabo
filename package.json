@@ -1,5 +1,8 @@
 {
-  "name": "bricore",
+  "engines": {
+    "node": "18.x"
+  },
+  "name": "opunabo-associate",
   "version": "0.1.0",
   "private": true,
   "scripts": {
