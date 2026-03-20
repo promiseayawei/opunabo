@@ -6,7 +6,8 @@ import { notFound } from "next/navigation";
 import { use } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, ChevronRight, ArrowLeft, Scale, BookOpen, Trophy } from "lucide-react";
-import { attorneys, Particles } from "../../../components/teamData";
+import { attorneys } from "../../../components/attorneyData";
+import { Particles } from "../../../components/teamData";
 
 /* ── props ───────────────────────────────────────────────────── */
 interface Props {
