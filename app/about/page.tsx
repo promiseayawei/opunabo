@@ -139,7 +139,7 @@ export default function AboutPage() {
           <motion.div className="flex items-center justify-center gap-3 mb-8"
             initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.3, duration: 0.8 }}>
             <div className="h-px w-12 bg-gradient-to-r from-transparent to-[#FFD700]" />
-            <span className="text-[#FFD700]/70 text-xs font-sans tracking-[0.3em] uppercase">Est. 1999 · Port Harcourt, Nigeria</span>
+            <span className="text-[#FFD700]/70 text-xs font-sans tracking-[0.3em] uppercase">EST. 2019 · Port Harcourt, Nigeria</span>
             <div className="h-px w-12 bg-gradient-to-l from-transparent to-[#FFD700]" />
           </motion.div>
 

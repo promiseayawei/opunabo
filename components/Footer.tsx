@@ -65,7 +65,7 @@ export default function Footer() {
 
           <p className="text-[13px] leading-relaxed mb-5" style={{ color: "rgba(241,241,241,0.4)" }}>
             Rivers State&apos;s trusted counsel for complex litigation, corporate mandates,
-            and property law. Called to the Nigerian Bar since 1999.
+            and property law. Called to the Nigerian Bar since 2019.
           </p>
 
           {/* decorative divider */}
@@ -183,6 +183,12 @@ export default function Footer() {
             style={{ color: "rgba(241,241,241,0.2)", fontFamily: "sans-serif" }}
           >
             &copy; {year} Opunabo Ekine & Associates. All rights reserved.
+          </p>
+          <p
+            className="text-[11px] tracking-widest"
+            style={{ color: "rgba(241,241,241,0.18)", fontFamily: "sans-serif" }}
+          >
+            Developed by <a href="https://ayaweisoft.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#FFD700] underline transition-colors duration-300">Ayaweisoft Limited</a> ayaweisoft.com
           </p>
           <div className="flex items-center gap-1" style={{ fontFamily: "sans-serif" }}>
             <div className="w-px h-3 bg-[#FFD700]/20 mx-2" />

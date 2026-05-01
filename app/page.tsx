@@ -19,7 +19,7 @@ import {
 /* ─── carousel data ────────────────────────────────────────── */
 const carouselImages = [
   { src: "/law-library.jpeg",   caption: "Deep-rooted Legal Expertise" },
-  { src: "/supreme-court.jpg",  caption: "Resolute Litigation & Advocacy" },
+  { src: "/supreme-Court.jpg",  caption: "Resolute Litigation & Advocacy" },
   { src: "/law-deal.jpeg",      caption: "Strategic Corporate Advisory" },
   { src: "/consultation.jpeg",  caption: "Client-Focused Legal Solutions" },
 ];
@@ -138,9 +138,9 @@ export default function Home() {
   const statsRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef(0);
 
-  const years     = useCountUp(25,   statsVisible);
-  const cases     = useCountUp(1200, statsVisible);
-  const attorneys = useCountUp(15,   statsVisible);
+  const years     = useCountUp(12,   statsVisible);
+  const cases     = useCountUp(500, statsVisible);
+  const attorneys = useCountUp(10,   statsVisible);
 
   /* carousel auto-advance */
   useEffect(() => {
@@ -211,7 +211,7 @@ export default function Home() {
           <motion.div className="flex items-center justify-center gap-4 mb-8" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.4, duration: 0.8 }}>
             <div className="h-px w-16 bg-gradient-to-r from-transparent to-[#FFD700]" />
             <div className="w-1.5 h-1.5 rotate-45 bg-[#FFD700]" />
-            <span className="text-[#FFD700] text-xs font-sans tracking-[0.35em] uppercase">Est. 1999 · Port Harcourt, Nigeria</span>
+            <span className="text-[#FFD700] text-xs font-sans tracking-[0.35em] uppercase">EST. 2019 · Port Harcourt, Nigeria</span>
             <div className="w-1.5 h-1.5 rotate-45 bg-[#FFD700]" />
             <div className="h-px w-16 bg-gradient-to-l from-transparent to-[#FFD700]" />
           </motion.div>
@@ -223,7 +223,7 @@ export default function Home() {
           </h1>
 
           <p className="text-xl md:text-2xl mb-10 max-w-3xl mx-auto text-white/75 leading-relaxed font-light tracking-wide">
-            Providing sophisticated legal counsel and aggressive advocacy.<br />
+            Providing sophisticated legal counsel and robust advocacy.<br />
             <em className="text-[#FFD700]/80">Integrity in practice, excellence in results.</em>
           </p>
 
