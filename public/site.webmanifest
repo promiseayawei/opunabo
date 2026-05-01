@@ -1,0 +1,13 @@
+{
+  "name": "Opunabo Ekine & Associates",
+  "short_name": "Opunabo & Associates",
+  "description": "Premier legal services in Port Harcourt, Nigeria",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#080C14",
+  "theme_color": "#080C14",
+  "icons": [
+    { "src": "/logo2.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/logo2.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
