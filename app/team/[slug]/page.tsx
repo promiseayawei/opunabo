@@ -2,33 +2,129 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { use } from "react";
+import { useParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, ChevronRight, ArrowLeft, Scale, BookOpen, Trophy } from "lucide-react";
 import { attorneys } from "../../../components/attorneyData";
 import { Particles } from "../../../components/teamData";
+import { api } from "@/lib/api";
+import { mapTeamMemberToView, type TeamCardViewModel } from "@/lib/publicMappers";
+import { formatCacheAge, getCachedEntry, isCacheStale, setCachedEntry } from "@/lib/swrCache";
+import { FetchSpinner, TeamProfileSkeleton } from "@/components/LoadingState";
 
-/* ── props ───────────────────────────────────────────────────── */
-interface Props {
-  params: Promise<{ slug: string }>;
-}
+const TEAM_PROFILE_STALE_TIME_MS = 300000;
 
 /* ══════════════════════════════════════════════════════════════
    PAGE
 ══════════════════════════════════════════════════════════════ */
-export default function AttorneyProfilePage({ params }: Props) {
-  const { slug } = use(params);
-  const attorney = attorneys.find((a) => a.slug === slug);
-  if (!attorney) notFound();
+export default function AttorneyProfilePage() {
+  const params = useParams<{ slug: string }>();
+  const slug = params?.slug || "";
+  const [team, setTeam] = useState<TeamCardViewModel[]>(attorneys);
+  const [attorney, setAttorney] = useState<TeamCardViewModel | null>(
+    attorneys.find((a) => a.slug === slug) || null
+  );
+  const [isMissing, setIsMissing] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+  const [cacheAge, setCacheAge] = useState("no cache");
 
-  const others = attorneys.filter((a) => a.slug !== attorney.slug);
+  useEffect(() => {
+    if (!slug) return;
+
+    let cancelled = false;
+    const cacheKey = "public:team:list:v1";
+
+    async function loadTeam() {
+      const cached = getCachedEntry<TeamCardViewModel[]>(cacheKey);
+      if (cached?.data?.length) {
+        setTeam(cached.data);
+        const selected = cached.data.find((item) => item.slug === slug) || null;
+        setAttorney(selected);
+        setIsMissing(!selected);
+      }
+      setCacheAge(formatCacheAge(cached?.updatedAt ?? null));
+
+      const shouldRevalidate = isCacheStale(cached, TEAM_PROFILE_STALE_TIME_MS);
+      setIsFetching(shouldRevalidate);
+      if (!shouldRevalidate) return;
+
+      try {
+        const response = await api.public.team();
+        if (cancelled) return;
+
+        const mapped = response.data.map((member, index) => mapTeamMemberToView(member, index));
+        if (mapped.length > 0) {
+          setTeam(mapped);
+          setCachedEntry(cacheKey, mapped);
+          setCacheAge("just now");
+          const selected = mapped.find((item) => item.slug === slug) || null;
+          setAttorney(selected);
+          setIsMissing(!selected);
+          return;
+        }
+
+        const fallback = attorneys.find((item) => item.slug === slug) || null;
+        setAttorney(fallback);
+        setIsMissing(!fallback);
+      } catch {
+        if (cancelled) return;
+
+        const fallback = attorneys.find((item) => item.slug === slug) || null;
+        setAttorney(fallback);
+        setIsMissing(!fallback);
+      } finally {
+        if (!cancelled) setIsFetching(false);
+      }
+    }
+
+    loadTeam();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  const others = useMemo(
+    () => (attorney ? team.filter((a) => a.slug !== attorney.slug) : []),
+    [attorney, team]
+  );
+
+  if (!attorney && isMissing) {
+    return (
+      <main className="bg-[#080C14] text-white min-h-screen flex items-center justify-center px-6">
+        <FetchSpinner show={isFetching} label="Loading profile" cacheAge={cacheAge} />
+        <div className="text-center max-w-lg">
+          <h1 className="text-3xl font-bold text-[#FFD700] mb-4">Profile Not Found</h1>
+          <p className="text-gray-400 mb-8">This team profile could not be found.</p>
+          <Link
+            href="/team"
+            className="inline-flex items-center gap-2 bg-[#FFD700] text-[#080C14] px-8 py-3 font-bold uppercase tracking-widest text-xs"
+          >
+            <ArrowLeft size={12} /> Back to Team
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  if (!attorney) {
+    return (
+      <main className="bg-[#080C14] text-white min-h-screen">
+        <FetchSpinner show={isFetching} label="Loading profile" cacheAge={cacheAge} />
+        <TeamProfileSkeleton />
+      </main>
+    );
+  }
+
+  const firstName = attorney.name.split(" ")[1] || attorney.name;
 
   return (
     <main
       className="bg-[#080C14] text-white overflow-x-hidden min-h-screen"
       style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
     >
+      <FetchSpinner show={isFetching} label="Refreshing profile" cacheAge={cacheAge} />
 
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">
@@ -138,7 +234,7 @@ export default function AttorneyProfilePage({ params }: Props) {
                 href="/contact"
                 className="inline-flex items-center gap-2 bg-[#FFD700] text-[#080C14] px-8 py-4 font-bold uppercase tracking-widest text-sm hover:bg-white hover:shadow-[0_0_40px_rgba(255,215,0,0.4)] transition-all duration-300 group"
               >
-                Instruct {attorney.name.split(" ")[1]}
+                Instruct {firstName}
                 <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
             </motion.div>
@@ -314,7 +410,7 @@ export default function AttorneyProfilePage({ params }: Props) {
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
             Ready to Work With{" "}
             <span className="text-[#FFD700] drop-shadow-[0_0_20px_rgba(255,215,0,0.4)]">
-              {attorney.name.split(" ")[1]}?
+              {firstName}?
             </span>
           </h2>
           <p className="text-gray-400 mb-10 font-sans text-sm">

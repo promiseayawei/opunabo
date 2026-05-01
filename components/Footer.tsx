@@ -179,14 +179,14 @@ export default function Footer() {
         <div className="w-full h-px bg-gradient-to-r from-transparent via-white/6 to-transparent mb-6" />
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <p
-            className="text-[11px] uppercase tracking-widest"
-            style={{ color: "rgba(241,241,241,0.2)", fontFamily: "sans-serif" }}
+            className="text-[11px] uppercase tracking-widest text-white"
+            style={{ color: "#cccaca", fontFamily: "sans-serif" }}
           >
             &copy; {year} Opunabo Ekine & Associates. All rights reserved.
           </p>
           <p
-            className="text-[11px] tracking-widest"
-            style={{ color: "rgba(241,241,241,0.18)", fontFamily: "sans-serif" }}
+            className="text-[11px] tracking-widest text-white"
+            style={{ color: "#cccaca", fontFamily: "sans-serif" }}
           >
             Developed by <a href="https://ayaweisoft.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#FFD700] underline transition-colors duration-300">Ayaweisoft Limited</a> ayaweisoft.com
           </p>
@@ -196,8 +196,8 @@ export default function Footer() {
               <span key={t} className="flex items-center gap-2">
                 <Link
                   href="#"
-                  className="text-[11px] uppercase tracking-widest hover:text-[#FFD700] transition-colors duration-300"
-                  style={{ color: "rgba(241,241,241,0.2)" }}
+                  className="text-[11px] uppercase tracking-widest hover:text-[#FFD700] transition-colors duration-300 text-white"
+                  style={{ color: "#cccaca" }}
                 >
                   {t}
                 </Link>

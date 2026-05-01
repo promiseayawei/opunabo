@@ -1,12 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { use } from "react";
+import { useParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Clock, ChevronRight, Scale, Tag } from "lucide-react";
-import { posts } from "../../../components/blogData";
+import { posts as fallbackPosts } from "../../../components/blogData";
 import { Particles } from "../../../components/teamData";
+import { api } from "@/lib/api";
+import { mapPostToBlogView, type BlogPostViewModel } from "@/lib/publicMappers";
+import { formatCacheAge, getCachedEntry, isCacheStale, setCachedEntry } from "@/lib/swrCache";
+import { BlogDetailSkeleton, FetchSpinner } from "@/components/LoadingState";
+
+const BLOG_DETAIL_STALE_TIME_MS = 60000;
 
 /* ── full article content keyed by slug ─────────────────────── */
 const content: Record<string, React.ReactNode> = {
@@ -65,7 +71,7 @@ const content: Record<string, React.ReactNode> = {
 };
 
 /* fallback content for posts without bespoke body */
-function DefaultContent({ post }: { post: (typeof posts)[0] }) {
+function DefaultContent({ post }: { post: BlogPostViewModel }) {
   return (
     <>
       <p>{post.excerpt}</p>
@@ -74,18 +80,122 @@ function DefaultContent({ post }: { post: (typeof posts)[0] }) {
   );
 }
 
-/* ── props ───────────────────────────────────────────────────── */
-interface Props { params: Promise<{ slug: string }> }
-
 /* ══════════════════════════════════════════════════════════════
    PAGE
 ══════════════════════════════════════════════════════════════ */
-export default function BlogPostPage({ params }: Props) {
-  const { slug } = use(params);
-  const post = posts.find((p) => p.slug === slug);
-  if (!post) notFound();
+export default function BlogPostPage() {
+  const params = useParams<{ slug: string }>();
+  const slug = params?.slug || "";
+  const [allPosts, setAllPosts] = useState<BlogPostViewModel[]>(fallbackPosts);
+  const [post, setPost] = useState<BlogPostViewModel | null>(
+    fallbackPosts.find((item) => item.slug === slug) || null
+  );
+  const [isMissing, setIsMissing] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+  const [cacheAge, setCacheAge] = useState("no cache");
 
-  const related = posts.filter((p) => p.slug !== slug && p.category === post.category).slice(0, 2);
+  useEffect(() => {
+    if (!slug) return;
+
+    let cancelled = false;
+    const cacheKey = `public:blog:detail:${slug}:v1`;
+
+    async function loadPost() {
+      const cached = getCachedEntry<{
+        post: BlogPostViewModel | null;
+        allPosts: BlogPostViewModel[];
+        isMissing: boolean;
+      }>(cacheKey);
+
+      if (cached) {
+        setPost(cached.data.post);
+        setAllPosts(cached.data.allPosts.length ? cached.data.allPosts : fallbackPosts);
+        setIsMissing(cached.data.isMissing);
+      }
+      setCacheAge(formatCacheAge(cached?.updatedAt ?? null));
+
+      const shouldRevalidate = isCacheStale(cached, BLOG_DETAIL_STALE_TIME_MS);
+      setIsFetching(shouldRevalidate);
+      if (!shouldRevalidate) return;
+
+      try {
+        const [single, listing] = await Promise.all([
+          api.public.posts.getBySlug(slug),
+          api.public.posts.list({ page: 1 }),
+        ]);
+
+        if (cancelled) return;
+
+        setPost(mapPostToBlogView(single.data));
+
+        const mappedList = listing.data.map(mapPostToBlogView);
+        if (mappedList.length > 0) {
+          setAllPosts(mappedList);
+        }
+
+        setIsMissing(false);
+        setCachedEntry(cacheKey, {
+          post: mapPostToBlogView(single.data),
+          allPosts: mappedList.length ? mappedList : fallbackPosts,
+          isMissing: false,
+        });
+        setCacheAge("just now");
+      } catch {
+        if (cancelled) return;
+
+        const fallback = fallbackPosts.find((item) => item.slug === slug) || null;
+        setPost(fallback);
+        setIsMissing(!fallback);
+        setCachedEntry(cacheKey, {
+          post: fallback,
+          allPosts: fallbackPosts,
+          isMissing: !fallback,
+        });
+        setCacheAge("just now");
+      } finally {
+        if (!cancelled) setIsFetching(false);
+      }
+    }
+
+    loadPost();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  const related = useMemo(() => {
+    if (!post) return [];
+    return allPosts.filter((item) => item.slug !== slug && item.category === post.category).slice(0, 2);
+  }, [allPosts, post, slug]);
+
+  if (!post && isMissing) {
+    return (
+      <main className="bg-[#080C14] text-white min-h-screen flex items-center justify-center px-6">
+        <FetchSpinner show={isFetching} label="Loading article" cacheAge={cacheAge} />
+        <div className="text-center max-w-lg">
+          <h1 className="text-3xl font-bold text-[#FFD700] mb-4">Article Not Found</h1>
+          <p className="text-gray-400 mb-8">This article could not be found or is no longer published.</p>
+          <Link
+            href="/blog"
+            className="inline-flex items-center gap-2 bg-[#FFD700] text-[#080C14] px-8 py-3 font-bold uppercase tracking-widest text-xs"
+          >
+            <ArrowLeft size={12} /> Back to The Brief
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  if (!post) {
+    return (
+      <main className="bg-[#080C14] text-white min-h-screen">
+        <FetchSpinner show={isFetching} label="Loading article" cacheAge={cacheAge} />
+        <BlogDetailSkeleton />
+      </main>
+    );
+  }
+
   const body = content[slug] ?? <DefaultContent post={post} />;
 
   return (
@@ -93,6 +203,7 @@ export default function BlogPostPage({ params }: Props) {
       className="bg-[#080C14] text-white overflow-x-hidden min-h-screen"
       style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
     >
+      <FetchSpinner show={isFetching} label="Refreshing article" cacheAge={cacheAge} />
 
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="relative overflow-hidden">

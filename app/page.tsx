@@ -3,6 +3,15 @@
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { api } from "@/lib/api";
+import {
+  mapPostToBlogView,
+  mapPracticeAreaToView,
+  mapTeamMemberToView,
+  mapTestimonialToView,
+} from "@/lib/publicMappers";
+import { formatCacheAge, getCachedEntry, isCacheStale, setCachedEntry } from "@/lib/swrCache";
+import { FetchSpinner } from "@/components/LoadingState";
 import {
   Scale,
   Gavel,
@@ -19,7 +28,7 @@ import {
 /* ─── carousel data ────────────────────────────────────────── */
 const carouselImages = [
   { src: "/law-library.jpeg",   caption: "Deep-rooted Legal Expertise" },
-  { src: "/supreme-Court.jpg",  caption: "Resolute Litigation & Advocacy" },
+  { src: "/Supreme-Court.jpg",  caption: "Resolute Litigation & Advocacy" },
   { src: "/law-deal.jpeg",      caption: "Strategic Corporate Advisory" },
   { src: "/consultation.jpeg",  caption: "Client-Focused Legal Solutions" },
 ];
@@ -129,12 +138,20 @@ const insights = [
   { date: "Jan 05, 2026", title: "Corporate Compliance: What Startups Miss in 2026",         cat: "Corporate" },
 ];
 
+const HOME_STALE_TIME_MS = 180000;
+
 /* ══════════════════════════════════════════════════════════════
    MAIN PAGE
 ═══════════════════════════════════════════════════════════════ */
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [statsVisible, setStatsVisible] = useState(false);
+  const [homePracticeAreas, setHomePracticeAreas] = useState(practiceAreas);
+  const [homePartners, setHomePartners] = useState(partners);
+  const [homeTestimonials, setHomeTestimonials] = useState(testimonials);
+  const [homeInsights, setHomeInsights] = useState(insights);
+  const [isFetching, setIsFetching] = useState(true);
+  const [cacheAge, setCacheAge] = useState("no cache");
   const statsRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef(0);
 
@@ -157,6 +174,141 @@ export default function Home() {
     return () => obs.disconnect();
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    const cacheKey = "public:home:bundle:v1";
+
+    const iconMap = {
+      gavel: Gavel,
+      briefcase: Briefcase,
+      landmark: Landmark,
+      shield: Shield,
+      users: Users2,
+      scale: Scale,
+    } as const;
+
+    function hydratePracticeAreas(
+      items: Array<{ title: string; desc: string; iconKey: string }>
+    ) {
+      return items.map((item) => {
+        const normalized = item.iconKey.toLowerCase().replace(/[^a-z]/g, "");
+        const Icon = iconMap[normalized as keyof typeof iconMap] || Scale;
+        return {
+          title: item.title,
+          desc: item.desc,
+          icon: Icon,
+        };
+      });
+    }
+
+    async function loadPublicContent() {
+      const cached = getCachedEntry<{
+        practiceAreas: Array<{ title: string; desc: string; iconKey: string }>;
+        partners: typeof partners;
+        testimonials: typeof testimonials;
+        insights: typeof insights;
+      }>(cacheKey);
+
+      if (cached) {
+        if (cached.data.practiceAreas?.length) {
+          setHomePracticeAreas(hydratePracticeAreas(cached.data.practiceAreas));
+        }
+        if (cached.data.partners?.length) setHomePartners(cached.data.partners);
+        if (cached.data.testimonials?.length) setHomeTestimonials(cached.data.testimonials);
+        if (cached.data.insights?.length) setHomeInsights(cached.data.insights);
+      }
+      setCacheAge(formatCacheAge(cached?.updatedAt ?? null));
+
+      const shouldRevalidate = isCacheStale(cached, HOME_STALE_TIME_MS);
+      setIsFetching(shouldRevalidate);
+      if (!shouldRevalidate) return;
+
+      try {
+        const [practiceResponse, teamResponse, testimonialsResponse, postsResponse] = await Promise.all([
+          api.public.practiceAreas(),
+          api.public.team(),
+          api.public.testimonials(),
+          api.public.posts.list({ page: 1 }),
+        ]);
+
+        if (cancelled) return;
+
+        const mappedPractices = practiceResponse.data.map((item, index) => {
+          const view = mapPracticeAreaToView(item, index);
+          return {
+            title: view.title,
+            desc: view.description,
+            iconKey: view.icon,
+          };
+        });
+
+        if (mappedPractices.length > 0) {
+          setHomePracticeAreas(hydratePracticeAreas(mappedPractices));
+        }
+
+        const mappedPartners = teamResponse.data.slice(0, 3).map((member, index) => {
+          const view = mapTeamMemberToView(member, index);
+          return {
+            name: view.name,
+            title: view.title,
+            specialty: view.specialty,
+            image: view.image,
+          };
+        });
+
+        if (mappedPartners.length > 0) {
+          setHomePartners(mappedPartners);
+        }
+
+        const mappedTestimonials = testimonialsResponse.data.slice(0, 3).map((item, index) => {
+          const view = mapTestimonialToView(item, index);
+          return {
+            text: view.text,
+            author: view.author,
+            pos: view.position,
+          };
+        });
+
+        if (mappedTestimonials.length > 0) {
+          setHomeTestimonials(mappedTestimonials);
+        }
+
+        const mappedInsights = postsResponse.data.slice(0, 3).map((post) => {
+          const view = mapPostToBlogView(post);
+          return {
+            date: view.date,
+            title: view.title,
+            cat: view.category,
+          };
+        });
+
+        if (mappedInsights.length > 0) {
+          setHomeInsights(mappedInsights);
+        }
+
+        setCachedEntry(cacheKey, {
+          practiceAreas: mappedPractices.length
+            ? mappedPractices
+            : practiceAreas.map((item) => ({ title: item.title, desc: item.desc, iconKey: "scale" })),
+          partners: mappedPartners.length ? mappedPartners : partners,
+          testimonials: mappedTestimonials.length ? mappedTestimonials : testimonials,
+          insights: mappedInsights.length ? mappedInsights : insights,
+        });
+        setCacheAge("just now");
+      } catch {
+        // Keep static fallback content if API is unavailable.
+      } finally {
+        if (!cancelled) setIsFetching(false);
+      }
+    }
+
+    loadPublicContent();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   /* swipe handlers */
   const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.changedTouches[0].clientX; };
   const handleTouchEnd   = (e: React.TouchEvent) => {
@@ -171,6 +323,7 @@ export default function Home() {
 
   return (
     <main className="bg-[#080C14] text-white overflow-x-hidden" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
+      <FetchSpinner show={isFetching} label="Refreshing homepage content" cacheAge={cacheAge} />
 
       {/* ── HERO ────────────────────────────────────────────── */}
       <section
@@ -300,7 +453,7 @@ export default function Home() {
           </p>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {practiceAreas.map((area, i) => {
+            {homePracticeAreas.map((area, i) => {
               const Icon = area.icon;
               return (
                 <motion.div key={i}
@@ -334,7 +487,7 @@ export default function Home() {
           <SectionHeading>The Partners</SectionHeading>
 
           <div className="grid md:grid-cols-3 gap-10">
-            {partners.map((partner, i) => (
+            {homePartners.map((partner, i) => (
               <motion.div key={i} className="group text-center"
                 initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }} transition={{ delay: i * 0.15, duration: 0.7 }}>
@@ -458,7 +611,7 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((t, i) => (
+            {homeTestimonials.map((t, i) => (
               <motion.div key={i}
                 className="relative bg-[#0E1420] p-8 border border-white/5 group hover:border-[#FFD700]/30 transition-colors duration-500"
                 initial={{ opacity: 0, y: 40 }}
@@ -488,7 +641,7 @@ export default function Home() {
           </p>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {insights.map((post, i) => (
+            {homeInsights.map((post, i) => (
               <motion.div key={i}
                 className="group relative bg-[#0E1420] p-7 cursor-pointer overflow-hidden"
                 initial={{ opacity: 0, y: 30 }}

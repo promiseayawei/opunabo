@@ -6,7 +6,7 @@ import React, { useState, useRef, useEffect } from "react";
 
 const carouselImages = [
   { src: "/law-library.jpeg", caption: "Deep-rooted Legal Expertise" },
-  { src: "/supreme-court.jpg", caption: "Resolute Litigation & Advocacy" },
+  { src: "/Supreme-Court.jpg", caption: "Resolute Litigation & Advocacy" },
   { src: "/law-deal.jpeg", caption: "Strategic Corporate Advisory" },
   { src: "/consultation.jpeg", caption: "Client-Focused Legal Solutions" },
 ];

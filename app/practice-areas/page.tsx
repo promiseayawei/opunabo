@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Gavel,
   Briefcase,
+  Scale,
   Landmark,
   ShieldAlert,
   FileText,
@@ -13,15 +14,21 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
+import { mapPracticeAreaToView } from "@/lib/publicMappers";
+import { formatCacheAge, getCachedEntry, isCacheStale, setCachedEntry } from "@/lib/swrCache";
+import { FetchSpinner } from "@/components/LoadingState";
+
+const PRACTICE_STALE_TIME_MS = 300000;
 
 /* ── data ─────────────────────────────────────────────────────── */
-const practices = [
+const fallbackPractices = [
   {
     id: "litigation",
     title: "Litigation & Dispute Resolution",
     icon: Gavel,
-    image: "/supreme-court.jpg",
+    image: "/Supreme-Court.jpg",
     tagline: "Fearless advocacy at every level of the judiciary.",
     description:
       "Our litigators are renowned for their courtroom prowess and strategic thinking. We handle everything from high-stakes commercial disputes to rigorous criminal defense, ensuring your rights are protected at every level.",
@@ -142,7 +149,9 @@ function Particles() {
 }
 
 /* ── accordion card ───────────────────────────────────────────── */
-function PracticeCard({ area, index }: { area: typeof practices[0]; index: number }) {
+type PracticeCardItem = typeof fallbackPractices[0];
+
+function PracticeCard({ area, index }: { area: PracticeCardItem; index: number }) {
   const [open, setOpen] = useState(false);
   const Icon = area.icon;
 
@@ -268,14 +277,84 @@ function PracticeCard({ area, index }: { area: typeof practices[0]; index: numbe
    PAGE
 ══════════════════════════════════════════════════════════════════ */
 export default function PracticeAreas() {
+  const [practices, setPractices] = useState<PracticeCardItem[]>(fallbackPractices);
+  const [isFetching, setIsFetching] = useState(true);
+  const [cacheAge, setCacheAge] = useState("no cache");
+
+  useEffect(() => {
+    let cancelled = false;
+    const cacheKey = "public:practice-areas:list:v1";
+
+    async function loadPracticeAreas() {
+      const cached = getCachedEntry<PracticeCardItem[]>(cacheKey, false);
+      if (cached?.data?.length) {
+        setPractices(cached.data);
+      }
+      setCacheAge(formatCacheAge(cached?.updatedAt ?? null));
+
+      const shouldRevalidate = isCacheStale(cached, PRACTICE_STALE_TIME_MS);
+      setIsFetching(shouldRevalidate);
+      if (!shouldRevalidate) return;
+
+      try {
+        const response = await api.public.practiceAreas();
+        if (cancelled) return;
+
+        const iconMap = {
+          gavel: Gavel,
+          briefcase: Briefcase,
+          landmark: Landmark,
+          shield: ShieldAlert,
+          shieldalert: ShieldAlert,
+          filetext: FileText,
+          users: Users,
+          scale: Scale,
+        } as const;
+
+        const mapped = response.data.map((item, index) => {
+          const view = mapPracticeAreaToView(item, index);
+          const iconKey = view.icon.toLowerCase().replace(/[^a-z]/g, "");
+          const Icon = iconMap[iconKey as keyof typeof iconMap] || Scale;
+
+          return {
+            id: view.id,
+            title: view.title,
+            icon: Icon,
+            image: view.image,
+            tagline: view.tagline,
+            description: view.description,
+            items: view.items,
+          };
+        });
+
+        if (mapped.length > 0) {
+          setPractices(mapped);
+          setCachedEntry(cacheKey, mapped, false);
+          setCacheAge("just now");
+        }
+      } catch {
+        // Keep local fallback if API is unavailable.
+      } finally {
+        if (!cancelled) setIsFetching(false);
+      }
+    }
+
+    loadPracticeAreas();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <main className="bg-[#080C14] text-white overflow-x-hidden" style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
+      <FetchSpinner show={isFetching} label="Refreshing practice areas" cacheAge={cacheAge} />
 
       {/* ── HERO HEADER ─────────────────────────────────────── */}
       <section className="relative py-36 text-center overflow-hidden">
         {/* bg image */}
         <div className="absolute inset-0 z-0">
-          <Image src="/supreme-court.jpg" alt="Practice Areas" fill sizes="100vw" className="object-cover opacity-60 brightness-110" />
+          <Image src="/Supreme-Court.jpg" alt="Practice Areas" fill sizes="100vw" className="object-cover opacity-60 brightness-110" />
         </div>
         <div className="absolute inset-0 bg-gradient-to-b from-[#080C14]/40 via-[#080C14]/20 to-[#080C14]/30 z-10" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_60%,rgba(255,215,0,0.07),transparent)] z-10 pointer-events-none" />

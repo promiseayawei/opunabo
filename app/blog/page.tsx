@@ -2,12 +2,16 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronRight, BookOpen, Clock, Tag } from "lucide-react";
 import { Particles } from "../../components/teamData";
-import { posts } from "../../components/blogData";
+import { posts as fallbackPosts } from "../../components/blogData";
+import { api } from "@/lib/api";
+import { mapPostToBlogView, type BlogPostViewModel } from "@/lib/publicMappers";
+import { formatCacheAge, getCachedEntry, isCacheStale, setCachedEntry } from "@/lib/swrCache";
+import { FetchSpinner } from "@/components/LoadingState";
 
-const categories = ["All", "Property Law", "Corporate Law", "Constitutional Law", "Estate Planning", "Commercial Law", "Litigation"];
+const BLOG_STALE_TIME_MS = 60000;
 
 const categoryColors: Record<string, string> = {
   "Property Law":      "#b8860b",
@@ -23,6 +27,53 @@ const categoryColors: Record<string, string> = {
 ══════════════════════════════════════════════════════════════ */
 export default function BlogPage() {
   const [active, setActive] = useState("All");
+  const [posts, setPosts] = useState<BlogPostViewModel[]>(fallbackPosts);
+  const [isFetching, setIsFetching] = useState(true);
+  const [cacheAge, setCacheAge] = useState("no cache");
+
+  useEffect(() => {
+    let cancelled = false;
+    const cacheKey = "public:blog:list:v1";
+
+    async function loadPosts() {
+      const cached = getCachedEntry<BlogPostViewModel[]>(cacheKey);
+      if (cached?.data?.length) {
+        setPosts(cached.data);
+      }
+      setCacheAge(formatCacheAge(cached?.updatedAt ?? null));
+
+      const shouldRevalidate = isCacheStale(cached, BLOG_STALE_TIME_MS);
+      setIsFetching(shouldRevalidate);
+      if (!shouldRevalidate) return;
+
+      try {
+        const response = await api.public.posts.list({ page: 1 });
+        if (cancelled) return;
+
+        const mapped = response.data.map(mapPostToBlogView);
+        if (mapped.length > 0) {
+          setPosts(mapped);
+          setCachedEntry(cacheKey, mapped);
+          setCacheAge("just now");
+        }
+      } catch {
+        // Keep static fallback content when API is unavailable.
+      } finally {
+        if (!cancelled) setIsFetching(false);
+      }
+    }
+
+    loadPosts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const dynamicCategories = useMemo(() => {
+    const fromPosts = Array.from(new Set(posts.map((p) => p.category).filter(Boolean)));
+    return ["All", ...fromPosts];
+  }, [posts]);
 
   const featured = posts.filter((p) => p.featured);
   const filtered = active === "All"
@@ -35,6 +86,7 @@ export default function BlogPage() {
       className="bg-[#080C14] text-white overflow-x-hidden min-h-screen"
       style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
     >
+      <FetchSpinner show={isFetching} label="Refreshing legal insights" cacheAge={cacheAge} />
 
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="relative py-36 text-center overflow-hidden">
@@ -165,7 +217,7 @@ export default function BlogPage() {
         style={{ background: "rgba(8,12,20,0.92)" }}>
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
-            {categories.map((cat) => (
+            {dynamicCategories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setActive(cat)}

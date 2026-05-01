@@ -4,6 +4,12 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { Scale, Gavel, Shield, Users, ChevronRight, Quote } from "lucide-react";
+import { api } from "@/lib/api";
+import { mapTeamMemberToView } from "@/lib/publicMappers";
+import { formatCacheAge, getCachedEntry, isCacheStale, setCachedEntry } from "@/lib/swrCache";
+import { FetchSpinner } from "@/components/LoadingState";
+
+const ABOUT_STALE_TIME_MS = 600000;
 
 /* ── types ──────────────────────────────────────────────────── */
 type Particle = { id: number; x: number; y: number; size: number; dur: number; delay: number };
@@ -90,7 +96,7 @@ const milestones = [
   },
 ];
 
-const partners = [
+const fallbackPartners = [
   {
     name: "Barr. Opunabo Ekine",
     title: "Principal Partner",
@@ -114,13 +120,104 @@ const partners = [
   },
 ];
 
+const initialAboutIntro =
+  "Opunabo Ekine & Associates is a full-service Nigerian law firm built on 25 years of principled practice, aggressive advocacy, and an unwavering commitment to client outcomes.";
+
+const initialAboutContent =
+  "Opunabo Ekine & Associates is a full-service law firm headquartered in Port Harcourt, Nigeria. Since our founding in 1999, we have grown into one of Rivers State's most respected legal institutions — known for courtroom tenacity, commercial sophistication, and genuine commitment to every client we represent.";
+
 /* ══════════════════════════════════════════════════════════════
    PAGE
 ══════════════════════════════════════════════════════════════ */
 export default function AboutPage() {
+  const [aboutIntro, setAboutIntro] = useState(initialAboutIntro);
+  const [aboutContent, setAboutContent] = useState(initialAboutContent);
+  const [aboutSections, setAboutSections] = useState<{ heading: string; body: string }[]>([]);
+  const [partners, setPartners] = useState(fallbackPartners);
+  const [isFetching, setIsFetching] = useState(true);
+  const [cacheAge, setCacheAge] = useState("no cache");
+
+  useEffect(() => {
+    let cancelled = false;
+    const cacheKey = "public:about:page:v1";
+
+    async function loadContent() {
+      const cached = getCachedEntry<{
+        aboutIntro: string;
+        aboutContent: string;
+        aboutSections: { heading: string; body: string }[];
+        partners: typeof fallbackPartners;
+      }>(cacheKey);
+
+      if (cached) {
+        setAboutIntro(cached.data.aboutIntro);
+        setAboutContent(cached.data.aboutContent);
+        setAboutSections(cached.data.aboutSections || []);
+        if (cached.data.partners?.length) setPartners(cached.data.partners);
+      }
+      setCacheAge(formatCacheAge(cached?.updatedAt ?? null));
+
+      const shouldRevalidate = isCacheStale(cached, ABOUT_STALE_TIME_MS);
+      setIsFetching(shouldRevalidate);
+      if (!shouldRevalidate) return;
+
+      try {
+        const [aboutResponse, teamResponse] = await Promise.all([
+          api.public.about(),
+          api.public.team(),
+        ]);
+
+        if (cancelled) return;
+
+        if (aboutResponse.data.content) {
+          setAboutIntro(aboutResponse.data.content);
+          setAboutContent(aboutResponse.data.content);
+        }
+
+        if (aboutResponse.data.sections?.length) {
+          setAboutSections(aboutResponse.data.sections);
+        }
+
+        const mappedTeam = teamResponse.data
+          .slice(0, 3)
+          .map((member, index) => mapTeamMemberToView(member, index))
+          .map((member) => ({
+            name: member.name,
+            title: member.title,
+            specialty: member.specialty,
+            image: member.image,
+            bio: member.bio[0] || "Profile details will be updated soon.",
+          }));
+
+        if (mappedTeam.length > 0) {
+          setPartners(mappedTeam);
+        }
+
+        setCachedEntry(cacheKey, {
+          aboutIntro: aboutResponse.data.content || initialAboutIntro,
+          aboutContent: aboutResponse.data.content || initialAboutContent,
+          aboutSections: aboutResponse.data.sections || [],
+          partners: mappedTeam.length > 0 ? mappedTeam : fallbackPartners,
+        });
+        setCacheAge("just now");
+      } catch {
+        // Keep fallback content if API is unavailable.
+      } finally {
+        if (!cancelled) setIsFetching(false);
+      }
+    }
+
+    loadContent();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <main className="bg-[#080C14] text-white overflow-x-hidden min-h-screen"
       style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
+      <FetchSpinner show={isFetching} label="Refreshing about page" cacheAge={cacheAge} />
 
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="relative py-36 text-center overflow-hidden min-h-[72vh] flex flex-col justify-center">
@@ -150,8 +247,7 @@ export default function AboutPage() {
           </h1>
 
           <p className="text-gray-400 text-lg md:text-xl font-sans font-light leading-relaxed max-w-3xl mx-auto">
-            Opunabo Ekine & Associates is a full-service Nigerian law firm built on 25 years of
-            principled practice, aggressive advocacy, and an unwavering commitment to client outcomes.
+            {aboutIntro}
           </p>
 
           <div className="flex items-center justify-center gap-3 mt-10">
@@ -218,19 +314,20 @@ export default function AboutPage() {
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
               Who We <span className="text-[#FFD700] drop-shadow-[0_0_12px_rgba(255,215,0,0.4)]">Are</span>
             </h2>
-            <p className="text-gray-400 font-sans text-sm leading-relaxed mb-5">
-              Opunabo Ekine &amp; Associates is a full-service law firm headquartered in Port Harcourt, Nigeria. Since our founding in 1999, we have grown into one of Rivers State&apos;s most respected legal institutions — known for courtroom tenacity, commercial sophistication, and genuine commitment to every client we represent.
-            </p>
+            <p className="text-gray-400 font-sans text-sm leading-relaxed mb-5">{aboutContent}</p>
             <p className="text-gray-400 font-sans text-sm leading-relaxed mb-8">
               We serve individuals, corporations, government bodies, and non-profit organisations across six core practice areas. From complex multi-jurisdictional litigation and energy sector advisory to family matters and property transactions, we bring the same rigour and dedication to every mandate.
             </p>
             <ul className="space-y-4">
-              {[
-                "Proven track record in the Nigerian superior courts",
-                "Multidisciplinary teams with deep specialist expertise",
-                "Transparent, timely communication on every matter",
-                "Strict confidentiality and attorney-client privilege",
-              ].map((item, i) => (
+              {(aboutSections.length > 0
+                ? aboutSections.map((section) => `${section.heading}: ${section.body}`)
+                : [
+                    "Proven track record in the Nigerian superior courts",
+                    "Multidisciplinary teams with deep specialist expertise",
+                    "Transparent, timely communication on every matter",
+                    "Strict confidentiality and attorney-client privilege",
+                  ]
+              ).map((item, i) => (
                 <motion.li key={i} className="flex items-center gap-4 text-sm text-gray-300 font-sans"
                   initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }} transition={{ delay: i * 0.1 + 0.3 }}>

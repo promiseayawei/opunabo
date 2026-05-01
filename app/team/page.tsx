@@ -3,19 +3,70 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { ChevronRight, Scale } from "lucide-react";
-import { attorneys } from "../../components/attorneyData"
-import { Particles } from "../../components/teamData"
+import { attorneys } from "../../components/attorneyData";
+import { Particles } from "../../components/teamData";
+import { api } from "@/lib/api";
+import { mapTeamMemberToView, type TeamCardViewModel } from "@/lib/publicMappers";
+import { formatCacheAge, getCachedEntry, isCacheStale, setCachedEntry } from "@/lib/swrCache";
+import { FetchSpinner } from "@/components/LoadingState";
+
+const TEAM_STALE_TIME_MS = 300000;
 
 /* ══════════════════════════════════════════════════════════════
    PAGE
 ══════════════════════════════════════════════════════════════ */
 export default function TeamPage() {
+  const [team, setTeam] = useState<TeamCardViewModel[]>(attorneys);
+  const [isFetching, setIsFetching] = useState(true);
+  const [cacheAge, setCacheAge] = useState("no cache");
+
+  useEffect(() => {
+    let cancelled = false;
+    const cacheKey = "public:team:list:v1";
+
+    async function loadTeam() {
+      const cached = getCachedEntry<TeamCardViewModel[]>(cacheKey);
+      if (cached?.data?.length) {
+        setTeam(cached.data);
+      }
+      setCacheAge(formatCacheAge(cached?.updatedAt ?? null));
+
+      const shouldRevalidate = isCacheStale(cached, TEAM_STALE_TIME_MS);
+      setIsFetching(shouldRevalidate);
+      if (!shouldRevalidate) return;
+
+      try {
+        const response = await api.public.team();
+        if (cancelled) return;
+
+        const mapped = response.data.map((member, index) => mapTeamMemberToView(member, index));
+        if (mapped.length > 0) {
+          setTeam(mapped);
+          setCachedEntry(cacheKey, mapped);
+          setCacheAge("just now");
+        }
+      } catch {
+        // Keep local fallback attorneys when API is unavailable.
+      } finally {
+        if (!cancelled) setIsFetching(false);
+      }
+    }
+
+    loadTeam();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <main
       className="bg-[#080C14] text-white overflow-x-hidden min-h-screen"
       style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}
     >
+      <FetchSpinner show={isFetching} label="Refreshing team profiles" cacheAge={cacheAge} />
 
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="relative py-36 text-center overflow-hidden">
@@ -70,7 +121,7 @@ export default function TeamPage() {
       {/* ── ATTORNEY CARDS ──────────────────────────────────── */}
       <section className="py-24 px-6">
         <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-10">
-          {attorneys.map((attorney, i) => (
+          {team.map((attorney, i) => (
             <motion.div
               key={attorney.slug}
               initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}

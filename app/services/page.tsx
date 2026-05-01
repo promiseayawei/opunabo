@@ -74,7 +74,7 @@ const services = [
     title: "Litigation & Dispute Resolution",
     desc: "Fearless, strategic representation across civil, criminal, and commercial courts at every level of the Nigerian judiciary.",
     items: ["Contract & Debt Recovery Disputes", "Criminal Defence & Appeals", "Fundamental Rights Enforcement", "Commercial Arbitration & Mediation"],
-    image: "/supreme-court.jpg",
+    image: "/Supreme-Court.jpg",
     imageAlt: "Litigation",
   },
   {

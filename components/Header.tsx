@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Menu as MenuIcon, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { Menu as MenuIcon, X, LayoutDashboard, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { type AdminUser } from "@/lib/api";
+import { api } from "@/lib/api";
+import { clearAdminSession, getAdminToken, getAdminUser } from "@/lib/adminSession";
 
 const links = [
   { label: "Home",          href: "/" },
@@ -19,12 +22,37 @@ const links = [
 ];
 
 export default function Header() {
-  const [open, setOpen]       = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const pathname              = usePathname();
+  const [open, setOpen]           = useState(false);
+  const [scrolled, setScrolled]   = useState(false);
+  const [authOpen, setAuthOpen]   = useState(false);
+  const [admin, setAdmin]         = useState<AdminUser | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
+  const pathname                  = usePathname();
+  const router                    = useRouter();
+  const dropdownRef               = useRef<HTMLDivElement>(null);
 
   /* close mobile nav on route change */
-  useEffect(() => { setOpen(false); }, [pathname]);
+  useEffect(() => { setOpen(false); setAuthOpen(false); }, [pathname]);
+
+  /* read auth state from localStorage */
+  useEffect(() => {
+    setAdmin(getAdminUser());
+
+    const onStorage = () => setAdmin(getAdminUser());
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  /* close dropdown when clicking outside */
+  useEffect(() => {
+    function onOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setAuthOpen(false);
+      }
+    }
+    if (authOpen) document.addEventListener("mousedown", onOutside);
+    return () => document.removeEventListener("mousedown", onOutside);
+  }, [authOpen]);
 
   /* shrink header on scroll */
   useEffect(() => {
@@ -32,6 +60,29 @@ export default function Header() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    try {
+      const token = getAdminToken();
+      if (token) await api.auth.logout({ token });
+    } catch { /* ignore */ } finally {
+      clearAdminSession();
+      setAdmin(null);
+      setAuthOpen(false);
+      setSigningOut(false);
+      router.push("/");
+    }
+  }
+
+  function initials(name: string) {
+    return name
+      .split(" ")
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join("")
+      .toUpperCase();
+  }
 
   return (
     <header
@@ -127,6 +178,89 @@ export default function Header() {
               Enquire
             </Link>
           </motion.div>
+
+          {/* ── Auth Area ─────────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.6, duration: 0.4 }}
+            className="ml-3 relative"
+            ref={dropdownRef}
+          >
+            {admin ? (
+              /* ── Logged-in avatar button ── */
+              <button
+                type="button"
+                onClick={() => setAuthOpen((o) => !o)}
+                className="flex items-center gap-2 rounded-full border border-[#FFD700]/40 bg-[#FFD700]/10 px-3 py-1.5 text-xs font-semibold text-[#FFD700] transition hover:bg-[#FFD700]/20"
+                style={{ fontFamily: "sans-serif" }}
+              >
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#FFD700] text-[10px] font-bold text-[#080C14]">
+                  {initials(admin.name)}
+                </span>
+                <span className="max-w-[90px] truncate">{admin.name.split(" ")[0]}</span>
+              </button>
+            ) : (
+              /* ── Guest buttons ── */
+              <div className="flex items-center gap-2" style={{ fontFamily: "sans-serif" }}>
+                <Link
+                  href="/admin/login"
+                  className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-gray-300 transition hover:text-[#FFD700]"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/admin/register"
+                  className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-widest border border-[#FFD700]/40 text-[#FFD700] transition hover:bg-[#FFD700]/10"
+                >
+                  Register
+                </Link>
+              </div>
+            )}
+
+            {/* ── Dropdown ── */}
+            <AnimatePresence>
+              {authOpen && admin && (
+                <motion.div
+                  key="auth-dropdown"
+                  initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                  transition={{ duration: 0.18 }}
+                  className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-white/10 bg-[#0E1420] py-1 shadow-2xl shadow-black/60 z-50"
+                >
+                  {/* user info */}
+                  <div className="border-b border-white/10 px-4 py-3">
+                    <p className="text-xs font-semibold text-white">{admin.name}</p>
+                    <p className="mt-0.5 truncate text-[11px] text-gray-400">{admin.email}</p>
+                    <span className="mt-1 inline-block rounded-sm bg-[#FFD700]/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[#FFD700]">
+                      {admin.role}
+                    </span>
+                  </div>
+
+                  {/* actions */}
+                  <Link
+                    href="/admin/dashboard"
+                    onClick={() => setAuthOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-gray-300 transition hover:bg-white/5 hover:text-[#FFD700]"
+                  >
+                    <LayoutDashboard size={13} className="flex-shrink-0" />
+                    Admin Panel
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    disabled={signingOut}
+                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-xs text-gray-300 transition hover:bg-white/5 hover:text-red-400 disabled:opacity-60"
+                  >
+                    <LogOut size={13} className="flex-shrink-0" />
+                    {signingOut ? "Signing out…" : "Sign Out"}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
         </nav>
 
         {/* ── Mobile Toggle ─────────────────────────────────── */}
@@ -216,6 +350,56 @@ export default function Header() {
                 >
                   Request a Consultation
                 </Link>
+              </motion.div>
+
+              {/* ── Mobile Auth ─────────────────────────────── */}
+              <motion.div
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                transition={{ delay: 0.42, duration: 0.3 }}
+                className="pt-2 pb-4 border-t border-white/5"
+              >
+                {admin ? (
+                  <div className="flex flex-col gap-1 pt-3">
+                    <div className="mb-2 flex items-center gap-3 px-1">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#FFD700] text-[11px] font-bold text-[#080C14] flex-shrink-0">
+                        {initials(admin.name)}
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-white">{admin.name}</p>
+                        <p className="text-[11px] text-gray-400 truncate">{admin.email}</p>
+                      </div>
+                    </div>
+                    <Link
+                      href="/admin/dashboard"
+                      className="flex items-center gap-2 py-2 text-xs uppercase tracking-widest text-gray-300 hover:text-[#FFD700] transition-colors"
+                    >
+                      <LayoutDashboard size={13} /> Admin Panel
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={handleSignOut}
+                      disabled={signingOut}
+                      className="flex items-center gap-2 py-2 text-xs uppercase tracking-widest text-gray-300 hover:text-red-400 transition-colors disabled:opacity-60"
+                    >
+                      <LogOut size={13} /> {signingOut ? "Signing out…" : "Sign Out"}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-3 pt-3" style={{ fontFamily: "sans-serif" }}>
+                    <Link
+                      href="/admin/login"
+                      className="flex-1 py-2.5 text-center text-[11px] font-semibold uppercase tracking-widest border border-white/15 text-gray-300 hover:text-[#FFD700] hover:border-[#FFD700]/40 transition-colors"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      href="/admin/register"
+                      className="flex-1 py-2.5 text-center text-[11px] font-semibold uppercase tracking-widest border border-[#FFD700]/40 text-[#FFD700] hover:bg-[#FFD700]/10 transition-colors"
+                    >
+                      Register
+                    </Link>
+                  </div>
+                )}
               </motion.div>
             </nav>
           </motion.div>

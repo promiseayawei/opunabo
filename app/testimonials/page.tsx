@@ -2,11 +2,17 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Quote, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { api } from "@/lib/api";
+import { mapTestimonialToView } from "@/lib/publicMappers";
+import { formatCacheAge, getCachedEntry, isCacheStale, setCachedEntry } from "@/lib/swrCache";
+import { FetchSpinner } from "@/components/LoadingState";
+
+const TESTIMONIALS_STALE_TIME_MS = 180000;
 
 /* ── data ─────────────────────────────────────────────────────── */
-const testimonials = [
+const fallbackTestimonials = [
   {
     text: "Opunabo Ekine & Associates provided clarity and direction during a very turbulent commercial dispute. Their strategic approach was methodical and their communication impeccable. We secured a settlement beyond our expectations.",
     author: "Chief Emeka Nwosu",
@@ -97,9 +103,17 @@ function Stars({ count }: { count: number }) {
 }
 
 /* ── featured carousel ──────────────────────────────────────── */
-function FeaturedCarousel() {
+function FeaturedCarousel({ testimonials }: { testimonials: typeof fallbackTestimonials }) {
   const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    if (idx >= testimonials.length) {
+      setIdx(0);
+    }
+  }, [idx, testimonials.length]);
+
   const t = testimonials[idx];
+
+  if (!t) return null;
 
   return (
     <div className="relative bg-[#0E1420] border border-white/5 overflow-hidden">
@@ -181,9 +195,53 @@ function FeaturedCarousel() {
    PAGE
 ══════════════════════════════════════════════════════════════ */
 export default function TestimonialsPage() {
+  const [testimonials, setTestimonials] = useState(fallbackTestimonials);
+  const [isFetching, setIsFetching] = useState(true);
+  const [cacheAge, setCacheAge] = useState("no cache");
+
+  useEffect(() => {
+    let cancelled = false;
+    const cacheKey = "public:testimonials:list:v1";
+
+    async function loadTestimonials() {
+      const cached = getCachedEntry<typeof fallbackTestimonials>(cacheKey);
+      if (cached?.data?.length) {
+        setTestimonials(cached.data);
+      }
+      setCacheAge(formatCacheAge(cached?.updatedAt ?? null));
+
+      const shouldRevalidate = isCacheStale(cached, TESTIMONIALS_STALE_TIME_MS);
+      setIsFetching(shouldRevalidate);
+      if (!shouldRevalidate) return;
+
+      try {
+        const response = await api.public.testimonials();
+        if (cancelled) return;
+
+        const mapped = response.data.map((item, index) => mapTestimonialToView(item, index));
+        if (mapped.length > 0) {
+          setTestimonials(mapped);
+          setCachedEntry(cacheKey, mapped);
+          setCacheAge("just now");
+        }
+      } catch {
+        // Keep fallback testimonials when API is unavailable.
+      } finally {
+        if (!cancelled) setIsFetching(false);
+      }
+    }
+
+    loadTestimonials();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <main className="bg-[#080C14] text-white overflow-x-hidden min-h-screen"
       style={{ fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
+      <FetchSpinner show={isFetching} label="Refreshing testimonials" cacheAge={cacheAge} />
 
       {/* ── HERO ─────────────────────────────────────────────── */}
       <section className="relative py-36 text-center overflow-hidden">
@@ -249,7 +307,7 @@ export default function TestimonialsPage() {
         <div className="max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }} transition={{ duration: 0.7 }}>
-            <FeaturedCarousel />
+            <FeaturedCarousel testimonials={testimonials} />
           </motion.div>
         </div>
       </section>
